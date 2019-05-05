@@ -1,0 +1,146 @@
+#include<windows.h>
+#include <iostream>
+#include<vector>
+#include<string>
+
+int main()
+{
+  void myMine();
+	myMine();
+}
+void display(int MineSizeRow, int MineSizeCol, vector<vector<char>>& Map)
+{
+	for (int i = 0; i < MineSizeRow+1; i++)
+	{
+		for (int j = 0; j < MineSizeCol+1; j++)
+		{
+			if (i == 0 && j == 0)
+				cout << "  ";
+			else if (i == 0)
+				cout << j-1 << " ";
+			else if (j == 0)
+				cout << i-1 << " ";
+			else
+				cout << Map[i-1][j-1] << " ";
+		}
+		cout << endl;
+	}
+}
+
+
+bool judgeMap(int a, int b, vector<vector<char>>& CurMap, vector<vector<char>>& RealMap)
+{
+	if (CurMap[a][b] != '-')
+		return true;
+	int r = CurMap.size();
+	int c = CurMap[0].size();
+	if (RealMap[a][b] == '#')
+	{
+		CurMap[a][b] = 'X';
+		return false;
+	}
+	if (RealMap[a][b] == '0')
+	{
+		CurMap[a][b] = '0';
+		if (a - 1 >= 0 && CurMap[a-1][b]=='-')
+			judgeMap(a - 1, b, CurMap, RealMap);
+		if (a + 1 < r && CurMap[a+1][b] == '-')
+			judgeMap(a + 1, b, CurMap, RealMap);
+		if (b - 1 >= 0 && CurMap[a][b-1] == '-')
+			judgeMap(a, b - 1, CurMap, RealMap);
+		if (b + 1 < c && CurMap[a][b+1] == '-')
+			judgeMap(a, b + 1, CurMap, RealMap);
+		
+		if (a - 1 >= 0 && b - 1 >= 0 && CurMap[a - 1][b - 1] == '-')
+			judgeMap(a-1, b - 1, CurMap, RealMap);
+		if (a - 1 >= 0 && b + 1 < c && CurMap[a - 1][b + 1] == '-')
+			judgeMap(a - 1, b + 1, CurMap, RealMap);
+		if (a + 1 < r && b - 1 >= 0 && CurMap[a + 1][b - 1] == '-')
+			judgeMap(a + 1, b - 1, CurMap, RealMap);
+		if (a + 1 < r && b + 1 < c && CurMap[a + 1][b + 1] == '-')
+			judgeMap(a + 1, b + 1, CurMap, RealMap);
+		return true;
+	}
+	else
+	{
+		CurMap[a][b] = RealMap[a][b];
+		return true;
+	}
+
+}
+void myMine()
+{
+	int MineSizeRow = 10;
+	int MineSizeCol = 10;
+	int MineNum = 10;
+	
+	//生成雷图
+	vector<vector<bool>> Mine(MineSizeRow, vector<bool>(MineSizeCol, false));
+	for (int i = 0; i < MineNum; i++)
+	{
+		int a = rand() % MineSizeRow;
+		int b = rand() % MineSizeCol;
+		if (!Mine[a][b])
+			Mine[a][b] = true;
+		else
+			i--;
+	}
+	for (int i = 0; i < MineSizeRow; i++)
+	{
+		for (int j = 0; j < MineSizeCol; j++)
+		{
+			cout << Mine[i][j]<<" ";
+		}
+		cout << endl;
+	}
+
+	cout << endl<<endl;
+	vector<int> Nine1 = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
+	vector<int> Nine2 = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
+	vector<vector<char>> RealMap(MineSizeRow, vector<char>(MineSizeCol, '#'));
+	for (int i = 0; i < MineSizeRow; i++)
+	{
+		for (int j = 0; j < MineSizeCol; j++)
+		{
+			if (Mine[i][j])
+				cout << "雷";
+			else
+			{
+				int num = 0;
+				for (int k = 0; k < 9; k++)
+				{
+					if (i + Nine1[k] < 0 || i + Nine1[k] >= MineSizeRow || j + Nine2[k] < 0 || j + Nine2[k] >= MineSizeCol)
+						continue;
+					if (Mine[i + Nine1[k]][j + Nine2[k]])
+						num++;
+				}
+				RealMap[i][j] = num + '0';
+				cout << num<<" ";
+			}
+		}
+		cout << endl;
+	}
+
+	vector<vector<char>> CurMap(MineSizeRow, vector<char>(MineSizeCol, '-'));
+	display(MineSizeRow, MineSizeCol, CurMap);
+	int a=0, b=0;
+	char c;
+	while (true)
+	{
+		cin >> a>>b>>c;
+		bool notFall = true;
+		if (c == 'P')
+			CurMap[a][b] = 'P';
+		else
+			notFall = judgeMap(a, b, CurMap, RealMap);
+		
+		system("cls");
+		display(MineSizeRow, MineSizeCol, CurMap);
+		if (!notFall)
+		{
+			cout << "you lose!" << endl;
+			display(MineSizeRow, MineSizeCol, RealMap);
+			break;
+		}
+	}
+}
