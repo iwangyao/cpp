@@ -1,0 +1,127 @@
+#include <iostream>
+#include<vector>
+#include<string>
+#include<stack>
+#include<algorithm>
+#include<unordered_set>
+#include<unordered_map>
+#include<map>
+#include<queue>
+#include<windows.h>
+using namespace std;
+
+//冒泡、选择、插入、快排、堆排、归并、桶排、基排
+void sort_maopao(vector<int>& a);
+void sort_xuanze(vector<int>& a);
+void sort_charu(vector<int>& a);
+void sort_quick(vector<int>& a);
+
+
+void sort_maopao(vector<int>& a)
+{
+	for (int i = 0; i < a.size(); i++)
+	{
+		for (int j = i + 1; j < a.size(); j++)
+		{
+			if (a[i] > a[j])
+			{
+				int tmp = a[i];
+				a[i] = a[j];
+				a[j] = tmp;
+			}
+		}
+	}
+}
+
+void sort_xuanze(vector<int>& a)
+{
+	for (int i = 0; i < a.size() - 1; i++)
+	{
+		int min_index = i;
+		for (int j = i + 1; j < a.size(); j++)
+			if (a[min_index] > a[j])
+				min_index = j;
+		if (min_index != i)
+		{
+			int tmp = a[i];
+			a[i] = a[min_index];
+			a[min_index] = tmp;
+		}
+	}
+}
+void sort_charu(vector<int>& a)
+{
+	for (int i = 1; i < a.size() ; i++)
+	{
+		int v = a[i];
+		int j;
+		for (j = i - 1; j >= 0 && a[j]>v; j--)
+			a[j+1] = a[j];
+		a[j+1] = v;
+	}
+}
+
+
+
+void help(vector<int>& a, int low, int high)
+{
+	int pivot = a[low];
+	int start = low, end = high;
+	while (low < high)
+	{
+		while (low < high && a[high]>pivot)
+			high--;
+		if (low < high)
+			a[low++] = a[high];
+		while (low < high && a[low] < pivot)
+			low++;
+		if (low < high)
+			a[high--] = a[low];
+	}
+	a[low] = pivot;
+	if (low - 1 > start)
+		help(a, start, low - 1);
+	if (low + 1 < end)
+		help(a, low+1, end);
+}
+void sort_quick(vector<int>& a)
+{
+	int low = 0;
+	int high = a.size() - 1;
+	help(a, low, high);
+}
+
+
+
+void adjustHeap(vector<int>&a, int i, int length)
+{
+	int tmp = a[i];
+	for (int nChild = 2*i+1;nChild<length;)
+	{
+		if (nChild + 1 < length && a[nChild] < a[nChild + 1])
+			nChild++;
+		
+		if (a[nChild] > tmp)
+		{
+			a[i] = a[nChild];
+			i = nChild;
+		}
+		else
+			break;
+	}
+	a[i] = tmp;
+}
+void sort_heap(vector<int>& a)
+{
+	int n = a.size();
+	for (int i = n / 2 - 1; i >= 0; i--)
+		adjustHeap(a, i, n);
+
+	for (int i = n - 1; i >= 0; i--)
+	{
+		int tmp = a[0];
+		a[0] = a[i];
+		a[i] = tmp;
+		adjustHeap(a, 0, i);
+	}
+}
